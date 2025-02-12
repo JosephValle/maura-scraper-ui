@@ -12,14 +12,10 @@ class ScrapersScreen extends StatefulWidget {
 }
 
 class _ScrapersScreenState extends State<ScrapersScreen> {
-  int knownLength = 0;
   late final bloc = context.read<ScraperBloc>();
   final ScrollController _scrollController = ScrollController();
 
   void _runScraper() {
-    setState(() {
-      knownLength = 0;
-    });
     bloc.add(ResetScraper());
   }
 
@@ -50,18 +46,6 @@ class _ScrapersScreenState extends State<ScrapersScreen> {
     return BlocConsumer<ScraperBloc, ScraperState>(
       listener: (context, state) {},
       builder: (context, state) {
-        if (state.scrapers.length > knownLength) {
-          knownLength = state.scrapers.length;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Results Loaded!'),
-                duration: Duration(seconds: 1),
-              ),
-            );
-          });
-        }
-
         return SelectionArea(
           child: Scaffold(
             appBar: AppBar(
@@ -92,6 +76,8 @@ class _ScrapersScreenState extends State<ScrapersScreen> {
                   ),
                 ),
                 const Gap(8),
+                if (!bloc.hasMore) const Text('No more articles to load'),
+                if (!bloc.hasMore) const Gap(8),
               ],
             ),
           ),
