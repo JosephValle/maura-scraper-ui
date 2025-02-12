@@ -79,9 +79,17 @@ class _ScrapersScreenState extends State<ScrapersScreen> {
                     ),
                   ),
                 ),
-                const Gap(8),
-                if (!bloc.hasMore) const Text('No more articles to load'),
-                if (!bloc.hasMore) const Gap(8),
+                const Gap(16),
+                if (!bloc.hasMore)
+                  const Text(
+                    'No more articles to load',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                if (!bloc.hasMore) const Gap(16),
               ],
             ),
           ),
