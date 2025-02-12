@@ -67,7 +67,7 @@ class _ScrapersScreenState extends State<ScrapersScreen> {
                   child: state is ScraperLoading || state is ScraperInitial
                       ? const SizedBox(
                           width: double.infinity,
-                          child: LinearProgressIndicator(),
+                          child: Center(child: LinearProgressIndicator()),
                         )
                       : !bloc.hasMore
                           ? Container(
