@@ -77,7 +77,7 @@ class _ScrapersScreenState extends State<ScrapersScreen> {
                               child: const Padding(
                                 padding: EdgeInsets.all(4.0),
                                 child: Text(
-                                  'No more articles to Load',
+                                  'No More Articles to Load!',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     color: Colors.white,
