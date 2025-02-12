@@ -25,16 +25,6 @@ jobs:
       - name: Build
         run: flutter build web
 
-      - name: Create .well-known directory
-        run: mkdir -p build/web/.well-known
-
-      - name: Create Apple file
-        run: |
-          echo '{ "applinks": { "apps": [], "details": [ { "appID": "Q5H6LPUXU5.org.vumc.mycapplusbeta", "paths": ["*"] } ] } }' > build/web/.well-known/apple-app-site-association
-#
-#      - name: Create _redirects file
-#        run: echo '/*    /index.html   200' > build/web/_redirects
-
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
