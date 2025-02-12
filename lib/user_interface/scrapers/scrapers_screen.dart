@@ -81,12 +81,15 @@ class _ScrapersScreenState extends State<ScrapersScreen> {
                     ? const Center(child: LinearProgressIndicator())
                     : const SizedBox.shrink(),
               ),
-              Expanded(
-                child: ListView.builder(
-                  controller: _scrollController,
-                  itemCount: state.scrapers.length,
-                  itemBuilder: (context, index) =>
-                      ScraperTile(scraper: state.scrapers[index]),
+              RefreshIndicator(
+                onRefresh: () async => _runScraper(),
+                child: Expanded(
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    itemCount: state.scrapers.length,
+                    itemBuilder: (context, index) =>
+                        ScraperTile(scraper: state.scrapers[index]),
+                  ),
                 ),
               ),
               const Gap(8),
