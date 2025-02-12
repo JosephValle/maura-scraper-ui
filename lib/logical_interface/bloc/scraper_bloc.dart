@@ -16,6 +16,7 @@ class ScraperBloc extends Bloc<ScraperEvent, ScraperState> {
   bool hasMore = true;
 
   ScraperBloc() : super(const ScraperInitial([])) {
+    /// Get the next page of articles.
     on<GetScrapers>((event, emit) async {
       if (state is ScraperLoading || !hasMore) return;
       emit(ScraperLoading(scrapers));
@@ -31,6 +32,7 @@ class ScraperBloc extends Bloc<ScraperEvent, ScraperState> {
       }
     });
 
+    /// Reset the scraper and load the first page of articles.
     on<ResetScraper>((event, emit) async {
       try {
         page = 1;

@@ -15,10 +15,12 @@ class _ScrapersScreenState extends State<ScrapersScreen> {
   late final bloc = context.read<ScraperBloc>();
   final ScrollController _scrollController = ScrollController();
 
+  /// Reset the scraper and load the first page of articles.
   void _runScraper() {
     bloc.add(ResetScraper());
   }
 
+  /// Load the next page of articles.
   void _loadScraper() {
     bloc.add(GetScrapers());
   }
@@ -71,8 +73,10 @@ class _ScrapersScreenState extends State<ScrapersScreen> {
                   child: ListView.builder(
                     controller: _scrollController,
                     itemCount: state.scrapers.length,
-                    itemBuilder: (context, index) =>
-                        ScraperTile(scraper: state.scrapers[index]),
+                    itemBuilder: (context, index) => ScraperTile(
+                      scraper: state.scrapers[index],
+                      key: ValueKey(state.scrapers[index]),
+                    ),
                   ),
                 ),
                 const Gap(8),
