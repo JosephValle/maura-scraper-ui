@@ -55,6 +55,7 @@ class _ScrapersScreenState extends State<ScrapersScreen> {
               actions: [
                 if (state is ScraperLoaded)
                   IconButton(
+                    tooltip: 'Refresh ALL Data (Takes ~30 seconds)',
                     onPressed: () => _runScraper(),
                     icon: const Icon(Icons.refresh),
                   ),

@@ -13,6 +13,7 @@ dependencies:
   flutter: # Default dependency
     sdk: flutter
   flutter_bloc: ^9.0.0 # For state management
+  flutter_widget_from_html: ^0.15.3
   gap: ^3.0.1 # For responsive design
   intl: ^0.20.2 # For date formatting
   url_launcher: ^6.3.1 # For opening URLs
