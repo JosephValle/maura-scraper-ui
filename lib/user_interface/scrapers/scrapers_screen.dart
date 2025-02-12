@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gap/gap.dart';
 import 'package:maura_scraper_ui/logical_interface/bloc/scraper_bloc.dart';
 import 'package:maura_scraper_ui/user_interface/scrapers/widgets/scraper_tile.dart';
 
@@ -28,7 +27,7 @@ class _ScrapersScreenState extends State<ScrapersScreen> {
   @override
   void initState() {
     super.initState();
-    _runScraper();
+    _loadScraper();
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
@@ -64,10 +63,30 @@ class _ScrapersScreenState extends State<ScrapersScreen> {
             body: Column(
               children: [
                 AnimatedSize(
-                  duration: const Duration(milliseconds: 250),
+                  duration: const Duration(milliseconds: 300),
                   child: state is ScraperLoading || state is ScraperInitial
-                      ? const Center(child: LinearProgressIndicator())
-                      : const SizedBox.shrink(),
+                      ? const SizedBox(
+                          width: double.infinity,
+                          child: LinearProgressIndicator(),
+                        )
+                      : !bloc.hasMore
+                          ? Container(
+                              width: double.infinity,
+                              color: Theme.of(context).colorScheme.primary,
+                              child: const Padding(
+                                padding: EdgeInsets.all(4.0),
+                                child: Text(
+                                  'No more articles to load',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
                 ),
                 Expanded(
                   child: ListView.builder(
@@ -79,17 +98,6 @@ class _ScrapersScreenState extends State<ScrapersScreen> {
                     ),
                   ),
                 ),
-                const Gap(16),
-                if (!bloc.hasMore)
-                  const Text(
-                    'No more articles to load',
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                if (!bloc.hasMore) const Gap(16),
               ],
             ),
           ),
