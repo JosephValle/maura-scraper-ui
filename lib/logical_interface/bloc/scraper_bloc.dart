@@ -17,10 +17,9 @@ class ScraperBloc extends Bloc<ScraperEvent, ScraperState> {
 
   ScraperBloc() : super(const ScraperInitial([])) {
     on<GetScrapers>((event, emit) async {
-      if (state is ScraperLoading) return;
+      if (state is ScraperLoading || !hasMore) return;
       emit(ScraperLoading(scrapers));
       try {
-        if (!hasMore) return;
         final response =
             await _apiClient.getScrapers(page: page, pageSize: pageSize);
         scrapers.addAll(response.scrapers);
