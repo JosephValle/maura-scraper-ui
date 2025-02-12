@@ -62,35 +62,37 @@ class _ScrapersScreenState extends State<ScrapersScreen> {
           });
         }
 
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Web Scraper'),
-            centerTitle: true,
-            actions: [
-              IconButton(
-                onPressed: () => _runScraper(),
-                icon: const Icon(Icons.refresh),
-              ),
-            ],
-          ),
-          body: Column(
-            children: [
-              AnimatedSize(
-                duration: const Duration(milliseconds: 250),
-                child: state is ScraperLoading || state is ScraperInitial
-                    ? const Center(child: LinearProgressIndicator())
-                    : const SizedBox.shrink(),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  controller: _scrollController,
-                  itemCount: state.scrapers.length,
-                  itemBuilder: (context, index) =>
-                      ScraperTile(scraper: state.scrapers[index]),
+        return SelectionArea(
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text('Web Scraper'),
+              centerTitle: true,
+              actions: [
+                IconButton(
+                  onPressed: () => _runScraper(),
+                  icon: const Icon(Icons.refresh),
                 ),
-              ),
-              const Gap(8),
-            ],
+              ],
+            ),
+            body: Column(
+              children: [
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 250),
+                  child: state is ScraperLoading || state is ScraperInitial
+                      ? const Center(child: LinearProgressIndicator())
+                      : const SizedBox.shrink(),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    itemCount: state.scrapers.length,
+                    itemBuilder: (context, index) =>
+                        ScraperTile(scraper: state.scrapers[index]),
+                  ),
+                ),
+                const Gap(8),
+              ],
+            ),
           ),
         );
       },
