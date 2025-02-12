@@ -68,10 +68,11 @@ class _ScrapersScreenState extends State<ScrapersScreen> {
               title: const Text('Web Scraper'),
               centerTitle: true,
               actions: [
-                IconButton(
-                  onPressed: () => _runScraper(),
-                  icon: const Icon(Icons.refresh),
-                ),
+                if (state is ScraperLoaded)
+                  IconButton(
+                    onPressed: () => _runScraper(),
+                    icon: const Icon(Icons.refresh),
+                  ),
               ],
             ),
             body: Column(
