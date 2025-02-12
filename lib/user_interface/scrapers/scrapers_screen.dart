@@ -51,7 +51,7 @@ class _ScrapersScreenState extends State<ScrapersScreen> {
         return SelectionArea(
           child: Scaffold(
             appBar: AppBar(
-              title: const Text('Web Scraper'),
+              title: const Text('Media Scraper'),
               centerTitle: true,
               actions: [
                 if (state is ScraperLoaded)
