@@ -18,9 +18,22 @@ dependencies:
   url_launcher: ^6.3.1 # For opening URLs
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.14.3 # For app icons
   flutter_lints: ^5.0.0 # For linting
   flutter_test: # Default dev dependency
     sdk: flutter
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/payload.jpg
+
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/payload.jpg"
+  web:
+    generate: true
+    image_path: "assets/payload.jpg"
