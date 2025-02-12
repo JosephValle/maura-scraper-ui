@@ -8,7 +8,7 @@ class ApiClient {
 
   Future<ScrapersResponse> getScrapers({
     required int page,
-    int pageSize = 10,
+    int pageSize = 20,
   }) async {
     try {
       final response = await _dio.get(

@@ -8,10 +8,11 @@ part 'scraper_event.dart';
 
 part 'scraper_state.dart';
 
+const int pageSize = 25;
+
 class ScraperBloc extends Bloc<ScraperEvent, ScraperState> {
   final ApiClient _apiClient = ApiClient();
   final List<ScraperModel> scrapers = [];
-  final int pageSize = 10;
   int page = 1;
   bool hasMore = true;
 
