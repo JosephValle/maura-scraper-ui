@@ -55,7 +55,7 @@ class _ScrapersScreenState extends State<ScrapersScreen> {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Results Loaded'),
+                content: Text('Results Loaded!'),
                 duration: Duration(seconds: 1),
               ),
             );
