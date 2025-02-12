@@ -1,0 +1,26 @@
+name: maura_scraper_ui
+description: "Maura's Web Scraper UI"
+publish_to: 'none'
+
+version: 1.0.0
+
+environment:
+  sdk: ^3.6.2
+
+dependencies:
+  cupertino_icons: ^1.0.8 # Default dependency
+  dio: ^5.8.0+1 # For making HTTP requests
+  flutter: # Default dependency
+    sdk: flutter
+  flutter_bloc: ^9.0.0 # For state management
+  gap: ^3.0.1 # For responsive design
+  intl: ^0.20.2 # For date formatting
+  url_launcher: ^6.3.1 # For opening URLs
+
+dev_dependencies:
+  flutter_lints: ^5.0.0 # For linting
+  flutter_test: # Default dev dependency
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
