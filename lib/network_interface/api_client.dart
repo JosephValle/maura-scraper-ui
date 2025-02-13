@@ -9,6 +9,7 @@ class ApiClient {
   Future<ScrapersResponse> getScrapers({
     required int page,
     int pageSize = 20,
+    required List<String> selectedTags,
   }) async {
     try {
       final response = await _dio.get(
@@ -16,6 +17,7 @@ class ApiClient {
         queryParameters: {
           'page': page,
           'page_size': pageSize,
+          'tags': selectedTags.isEmpty ? null : selectedTags,
         },
       );
       return ScrapersResponse.fromJson(response.data);
@@ -31,6 +33,16 @@ class ApiClient {
     } catch (e) {
       debugPrint('Error restarting scraper: $e');
       rethrow;
+    }
+  }
+
+  Future<List<String>> getTags() async {
+    try {
+      final response = await _dio.get('$_baseUrl/tags');
+      return List<String>.from(response.data);
+    } catch (e) {
+      debugPrint('Error getting tags: $e');
+      return ['Error getting tags'];
     }
   }
 }

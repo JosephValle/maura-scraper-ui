@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:maura_scraper_ui/logical_interface/bloc/scraper_bloc.dart';
+import 'package:maura_scraper_ui/user_interface/scrapers/tag_selection_screen.dart';
 import 'package:maura_scraper_ui/user_interface/scrapers/widgets/scraper_tile.dart';
 
 class ScrapersScreen extends StatefulWidget {
@@ -50,15 +51,26 @@ class _ScrapersScreenState extends State<ScrapersScreen> {
         return SelectionArea(
           child: Scaffold(
             appBar: AppBar(
-              title: const Text('Media Scraper'),
+              leading: state is ScraperLoaded
+                  ? IconButton(
+                      tooltip: 'Refresh ALL Data (Takes ~30 seconds)',
+                      onPressed: () => _runScraper(),
+                      icon: const Icon(Icons.refresh),
+                    )
+                  : null,
+              title: Text(
+                'Media Scraper${state is ScraperLoaded ? ' (${bloc.total} total sources)' : ''}',
+              ),
               centerTitle: true,
               actions: [
-                if (state is ScraperLoaded)
-                  IconButton(
-                    tooltip: 'Refresh ALL Data (Takes ~30 seconds)',
-                    onPressed: () => _runScraper(),
-                    icon: const Icon(Icons.refresh),
+                IconButton(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const TagSelectionScreen(),
+                    ),
                   ),
+                  icon: const Icon(Icons.filter_alt),
+                ),
               ],
             ),
             body: Column(

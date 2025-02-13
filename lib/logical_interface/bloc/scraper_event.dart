@@ -6,3 +6,9 @@ sealed class ScraperEvent {}
 class GetScrapers extends ScraperEvent {}
 
 class ResetScraper extends ScraperEvent {}
+
+class UpdateTags extends ScraperEvent {
+  final List<String> tags;
+
+  UpdateTags(this.tags);
+}
