@@ -78,6 +78,8 @@ class _ScraperTileState extends State<ScraperTile> {
                       ),
                     ),
                     const SizedBox(height: 6.0),
+                    Text("Tags: ${scraper.tags.join(', ')}"),
+                    const SizedBox(height: 6.0),
                     AnimatedSize(
                       duration: const Duration(milliseconds: 300),
                       child: expanded

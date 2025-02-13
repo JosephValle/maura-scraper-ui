@@ -17,9 +17,12 @@ class ApiClient {
         queryParameters: {
           'page': page,
           'page_size': pageSize,
-          'tags': selectedTags.isEmpty ? null : selectedTags,
+          if (selectedTags.isNotEmpty)
+            'tags': selectedTags.isEmpty ? null : selectedTags,
         },
       );
+      print("The example request is: ${response.requestOptions.uri}");
+      print("The response is: ${response.data}");
       return ScrapersResponse.fromJson(response.data);
     } catch (e) {
       debugPrint('Error getting scrapers: $e');

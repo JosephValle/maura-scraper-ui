@@ -17,6 +17,9 @@ class ScraperModel {
   /// The URL of the article.
   final String url;
 
+  /// The tags associated with the article.
+  final List<String> tags;
+
   /// Create a new ScraperModel instance.
   ScraperModel({
     required this.id,
@@ -25,6 +28,7 @@ class ScraperModel {
     required this.summary,
     required this.title,
     required this.url,
+    required this.tags,
   });
 
   /// Create a new ScraperModel instance from a JSON object.
@@ -36,6 +40,7 @@ class ScraperModel {
       summary: json['summary'],
       title: json['title'],
       url: json['url'],
+      tags: List<String>.from(json['tags']),
     );
   }
 }
