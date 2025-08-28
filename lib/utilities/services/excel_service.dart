@@ -39,10 +39,12 @@ class ExcelService {
       }
       final List<List<String>> grid = <List<String>>[];
       for (final row in sheet.rows) {
-        grid.add(row.map((cell) {
-          final v = cell?.value;
-          return v?.toString() ?? '';
-        }).toList());
+        grid.add(
+          row.map((cell) {
+            final v = cell?.value;
+            return v?.toString() ?? '';
+          }).toList(),
+        );
       }
       return grid;
     }
