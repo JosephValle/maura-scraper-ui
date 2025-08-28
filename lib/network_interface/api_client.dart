@@ -194,10 +194,14 @@ class ApiClient {
       // If server accidentally returned the legacy array of strings,
       // degrade gracefully (hasArticles=false). This protects callers.
       if (body is List && (body.isEmpty || body.first is String)) {
-        return body
+        final tagModels = body
             .cast<String>()
-            .map((t) => TagModel(tag: t, hasArticles: false))
-            .toList();
+            .map((t) => TagModel(tag: t.toLowerCase(), hasArticles: false));
+        final unique = <String, TagModel>{};
+        for (final tag in tagModels) {
+          unique[tag.tag] = tag;
+        }
+        return unique.values.toList();
       }
 
       throw ApiException('Unexpected /tags enriched payload shape', data: body);
@@ -250,9 +254,15 @@ class ApiClient {
       // If server returned the legacy {"tags":[...]} shape, degrade gracefully
       if (body is Map && body['tags'] is List) {
         final tagsList = (body['tags'] as List).cast<String>();
-        return tagsList
-            .map((t) => TagModel(tag: t, hasArticles: false))
-            .toList();
+        // Lowercase and create TagModels
+        final tagModels = tagsList
+            .map((t) => TagModel(tag: t.toLowerCase(), hasArticles: false));
+        // Deduplicate by tag
+        final unique = <String, TagModel>{};
+        for (final tag in tagModels) {
+          unique[tag.tag] = tag;
+        }
+        return unique.values.toList();
       }
 
       throw ApiException('Unexpected enriched /tags response', data: body);

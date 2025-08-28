@@ -385,6 +385,7 @@ class _TagSelectionScreenState extends State<TagSelectionScreen> {
   Widget _tagTile(TagModel tag) {
     final bool isSelected = selectedTags.contains(tag.tag);
     return Stack(
+      fit: StackFit.passthrough,
       children: [
         Padding(
           padding: const EdgeInsets.all(8.0),
@@ -416,8 +417,9 @@ class _TagSelectionScreenState extends State<TagSelectionScreen> {
           ),
         ),
         if (tag.hasArticles)
-          Align(
-            alignment: Alignment.topRight,
+          Positioned(
+            top: 0,
+            right: 0,
             child: Icon(
               Icons.auto_awesome,
               color: Theme.of(context).colorScheme.primary,
