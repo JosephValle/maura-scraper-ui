@@ -24,11 +24,13 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool loading = true;
+  bool takingAWhile = false;
 
   @override
   void initState() {
     super.initState();
     _initApp();
+    _startTimer();
   }
 
   @override
@@ -48,17 +50,17 @@ class _MyAppState extends State<MyApp> {
   }
 
   Widget _buildLoading() {
-    return const Scaffold(
+    return Scaffold(
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Center(child: CircularProgressIndicator()),
-          SizedBox(height: 20),
+          const Center(child: CircularProgressIndicator()),
+          const SizedBox(height: 20),
           Center(
-            child: Text(
-              'Loading from Cold Start... This can take up to 2 minutes',
-            ),
+            child: Text(takingAWhile
+                ? 'Loading from Cold Start... This can take up to 2 minutes'
+                : 'Loading...',),
           ),
         ],
       ),
@@ -75,5 +77,15 @@ class _MyAppState extends State<MyApp> {
         loading = false;
       });
     }
+  }
+
+  void _startTimer() {
+    Future.delayed(const Duration(seconds: 5), () {
+      if (mounted && loading) {
+        setState(() {
+          takingAWhile = true;
+        });
+      }
+    });
   }
 }
