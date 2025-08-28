@@ -9,17 +9,28 @@ import 'models/class_tag_model.dart';
 
 List<TagModel> availableTags = [];
 late SharedPreferences sharedPreferences;
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  availableTags = await ApiClient().getTags();
-  availableTags
-      .sort((a, b) => a.tag.toLowerCase().compareTo(b.tag.toLowerCase()));
-  sharedPreferences = await SharedPreferences.getInstance();
+
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _initApp();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,8 +43,38 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
         ),
         debugShowCheckedModeBanner: false,
-        home: const ScrapersScreen(),
+        home: loading ? _buildLoading() : const ScrapersScreen(),
       ),
     );
+  }
+
+  Widget _buildLoading() {
+    return const Scaffold(
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Center(child: CircularProgressIndicator()),
+          SizedBox(height: 20),
+          Center(
+            child: Text(
+              'Loading from Cold Start... This can take up to 2 minutes',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _initApp() async {
+    availableTags = await ApiClient().getTags();
+    availableTags
+        .sort((a, b) => a.tag.toLowerCase().compareTo(b.tag.toLowerCase()));
+    sharedPreferences = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        loading = false;
+      });
+    }
   }
 }
