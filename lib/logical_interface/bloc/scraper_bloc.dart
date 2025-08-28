@@ -65,7 +65,7 @@ class ScraperBloc extends Bloc<ScraperEvent, ScraperState> {
 
     on<UpdateTagList>((event, emit) async {
       try {
-        availableTags = await _apiClient.setTags(event.tags);
+        availableTags = await _apiClient.setTagsAndGetModels(event.tags);
         if (event.tags.length != availableTags.length) {
           throw Exception('Tags not updated');
         }

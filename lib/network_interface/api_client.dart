@@ -3,6 +3,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:maura_scraper_ui/models/response/scrapers_response.dart';
 
+import '../models/class_tag_model.dart';
+
 /// Lightweight API error to propagate meaningful messages to UI layers.
 class ApiException implements Exception {
   final String message;
@@ -166,54 +168,96 @@ class ApiClient {
   // Tags (canonical list)
   // ----------------------
 
-  /// GET /tags → either canonical list (if set) or aggregated list.
-  Future<List<String>> getTags({CancelToken? cancelToken}) async {
+  /// GET /tags?include_has_articles=1 → [{tag, has_articles}, ...]
+  Future<List<TagModel>> getTags({CancelToken? cancelToken}) async {
     try {
       final resp = await dio.get<dynamic>(
         '/tags',
+        queryParameters: {'include_has_articles': 1},
         cancelToken: cancelToken,
       );
 
-      // Server returns a JSON array (canonical) OR aggregated list (also array).
       final body = resp.data;
+
+      // Expected shape: List<Map<String, dynamic>>
       if (body is List) {
-        return body.cast<String>();
+        if (body.isEmpty) return <TagModel>[];
+        final first = body.first;
+        if (first is Map<String, dynamic>) {
+          return body
+              .cast<Map<String, dynamic>>()
+              .map((e) => TagModel.fromJson(e))
+              .toList();
+        }
       }
 
-      // Defensive handling: if server ever returns {"tags":[...]}.
-      if (body is Map && body['tags'] is List) {
-        return (body['tags'] as List).cast<String>();
+      // If server accidentally returned the legacy array of strings,
+      // degrade gracefully (hasArticles=false). This protects callers.
+      if (body is List && (body.isEmpty || body.first is String)) {
+        return body
+            .cast<String>()
+            .map((t) => TagModel(tag: t, hasArticles: false))
+            .toList();
       }
 
-      throw ApiException('Unexpected /tags payload shape', data: body);
+      throw ApiException('Unexpected /tags enriched payload shape', data: body);
     } on DioException catch (e) {
-      throw _asApiException(e, fallback: 'Failed to load tags');
+      throw _asApiException(
+        e,
+        fallback: 'Failed to load tags with article status',
+      );
     }
   }
 
-  /// PUT /tags with EXACT replacement semantics.
-  /// Server echoes exactly what it receives: {"tags": [...]}
-  Future<List<String>> setTags(
+  /// PUT/POST /tags?include_has_articles=1
+  /// Returns: [{ "tag": "...", "has_articles": bool }, ...]
+  Future<List<TagModel>> setTagsAndGetModels(
     List<String> tags, {
     CancelToken? cancelToken,
-    bool usePost = false, // flip to true if you prefer POST over PUT
+    bool usePost = false,
   }) async {
     try {
-      final method = usePost
-          ? dio.post<Map<String, dynamic>>
-          : dio.put<Map<String, dynamic>>;
+      final method = usePost ? dio.post<dynamic> : dio.put<dynamic>;
+
       final resp = await method(
         '/tags',
+        queryParameters: {'include_has_articles': 1},
         data: jsonEncode({'tags': tags}),
         cancelToken: cancelToken,
       );
-      final data = resp.data;
-      if (data == null || data['tags'] is! List) {
-        throw ApiException('Unexpected /tags response', data: resp.data);
+
+      final body = resp.data;
+
+      // Preferred shape: List<Map<String,dynamic>>
+      if (body is List) {
+        if (body.isEmpty) return <TagModel>[];
+        final first = body.first;
+        if (first is Map<String, dynamic>) {
+          return body
+              .cast<Map<String, dynamic>>()
+              .map((e) => TagModel.fromJson(e))
+              .toList();
+        }
+        // If server sent back a list of strings, degrade (hasArticles=false)
+        if (first is String) {
+          return body
+              .cast<String>()
+              .map((t) => TagModel(tag: t, hasArticles: false))
+              .toList();
+        }
       }
-      return (data['tags'] as List).cast<String>();
+
+      // If server returned the legacy {"tags":[...]} shape, degrade gracefully
+      if (body is Map && body['tags'] is List) {
+        final tagsList = (body['tags'] as List).cast<String>();
+        return tagsList
+            .map((t) => TagModel(tag: t, hasArticles: false))
+            .toList();
+      }
+
+      throw ApiException('Unexpected enriched /tags response', data: body);
     } on DioException catch (e) {
-      throw _asApiException(e, fallback: 'Failed to set tags');
+      throw _asApiException(e, fallback: 'Failed to set tags (enriched)');
     }
   }
 

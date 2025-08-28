@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:maura_scraper_ui/models/class_tag_model.dart';
 import 'package:maura_scraper_ui/utilities/services/excel_service.dart';
 
 import '../../logical_interface/bloc/scraper_bloc.dart';
@@ -29,7 +30,7 @@ class _TagSelectionScreenState extends State<TagSelectionScreen> {
     if (persisted != null && persisted.isNotEmpty) {
       // Keep only tags that still exist in availableTags
       final filtered =
-          persisted.where((t) => availableTags.contains(t)).toList();
+          persisted.where((t) => availableTags.map((e) => e.tag).contains(t)).toList();
       setState(() {
         selectedTags = filtered;
       });
@@ -311,6 +312,16 @@ class _TagSelectionScreenState extends State<TagSelectionScreen> {
     );
   }
 
+  void _selectAllWithArticles() {
+    setState(() {
+      selectedTags = availableTags
+          .where((tag) => tag.hasArticles)
+          .map((tag) => tag.tag)
+          .toList();
+    });
+    _saveSelection();
+  }
+
   @override
   Widget build(BuildContext context) {
     // NOTE: `availableTags` is assumed to be provided from your app context (as in your original file).
@@ -325,6 +336,13 @@ class _TagSelectionScreenState extends State<TagSelectionScreen> {
             ),
             title: const Text('Tag Selection'),
             actions: [
+              IconButton(
+                onPressed: _selectAllWithArticles,
+                icon: const Icon(
+                  Icons.auto_awesome,
+                ),
+                tooltip: 'Select all Tags with Articles',
+              ),
               IconButton(
                 onPressed: _handleUploadTags, // FIXED: do not call immediately
                 tooltip: 'Upload Tags (Excel/CSV)',
@@ -352,7 +370,7 @@ class _TagSelectionScreenState extends State<TagSelectionScreen> {
                   spacing: 8.0,
                   runSpacing: 8.0,
                   children: [
-                    for (final String tag in availableTags) _tagTile(tag),
+                    for (final tag in availableTags) _tagTile(tag),
                   ],
                 ),
               ),
@@ -363,36 +381,49 @@ class _TagSelectionScreenState extends State<TagSelectionScreen> {
     );
   }
 
-  Widget _tagTile(String tag) {
-    final bool isSelected = selectedTags.contains(tag);
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.blue : Colors.white,
-          borderRadius: BorderRadius.circular(12.0),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 6.0,
-              spreadRadius: 2.0,
+  Widget _tagTile(TagModel tag) {
+    final bool isSelected = selectedTags.contains(tag.tag);
+    return Stack(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: isSelected ? Colors.blue : Colors.white,
+              borderRadius: BorderRadius.circular(12.0),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 6.0,
+                  spreadRadius: 2.0,
+                ),
+              ],
             ),
-          ],
-        ),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12.0),
-          onTap: () => _toggleTag(tag),
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Text(
-              tag,
-              style: TextStyle(
-                color: isSelected ? Colors.white : Colors.black,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12.0),
+              onTap: () => _toggleTag(tag.tag),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Text(
+                  tag.tag,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : Colors.black,
+                  ),
+                ),
               ),
             ),
           ),
         ),
-      ),
+        if (tag.hasArticles)
+          Align(
+            alignment: Alignment.topRight,
+            child: Icon(
+              Icons.auto_awesome,
+              color: Theme.of(context).colorScheme.primary,
+              size: 16,
+            ),
+          ),
+      ],
     );
   }
 }

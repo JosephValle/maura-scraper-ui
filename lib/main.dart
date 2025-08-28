@@ -5,12 +5,15 @@ import 'package:maura_scraper_ui/network_interface/api_client.dart';
 import 'package:maura_scraper_ui/user_interface/scrapers/scrapers_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-List<String> availableTags = [];
+import 'models/class_tag_model.dart';
+
+List<TagModel> availableTags = [];
 late SharedPreferences sharedPreferences;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   availableTags = await ApiClient().getTags();
-  availableTags.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+  availableTags
+      .sort((a, b) => a.tag.toLowerCase().compareTo(b.tag.toLowerCase()));
   sharedPreferences = await SharedPreferences.getInstance();
   runApp(const MyApp());
 }
