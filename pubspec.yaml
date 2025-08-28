@@ -8,19 +8,23 @@ environment:
   sdk: ^3.6.2
 
 dependencies:
+  csv: ^6.0.0
   cupertino_icons: ^1.0.8 # Default dependency
   dio: ^5.8.0+1 # For making HTTP requests
+  excel: ^4.0.6
+  file_picker: ^10.3.2
   flutter: # Default dependency
     sdk: flutter
   flutter_bloc: ^9.0.0 # For state management
-  flutter_widget_from_html: ^0.15.3
+  flutter_widget_from_html: ^0.17.0
   gap: ^3.0.1 # For responsive design
   intl: ^0.20.2 # For date formatting
+  shared_preferences: ^2.5.3
   url_launcher: ^6.3.1 # For opening URLs
 
 dev_dependencies:
   flutter_launcher_icons: ^0.14.3 # For app icons
-  flutter_lints: ^5.0.0 # For linting
+  flutter_lints: ^6.0.0 # For linting
   flutter_test: # Default dev dependency
     sdk: flutter
 

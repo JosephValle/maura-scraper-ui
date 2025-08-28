@@ -12,3 +12,9 @@ class UpdateTags extends ScraperEvent {
 
   UpdateTags(this.tags);
 }
+
+class UpdateTagList extends ScraperEvent {
+  final List<String> tags;
+
+  UpdateTagList(this.tags);
+}

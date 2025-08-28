@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:maura_scraper_ui/main.dart';
 import 'package:meta/meta.dart';
 
 import '../../models/scraper_model.dart';
@@ -24,7 +25,7 @@ class ScraperBloc extends Bloc<ScraperEvent, ScraperState> {
       if (state is ScraperLoading || !hasMore) return;
       emit(ScraperLoading(scrapers));
       try {
-        final response = await _apiClient.getScrapers(
+        final response = await _apiClient.getArticles(
           page: page,
           pageSize: pageSize,
           selectedTags: selectedTags,
@@ -46,7 +47,7 @@ class ScraperBloc extends Bloc<ScraperEvent, ScraperState> {
         scrapers.clear();
         hasMore = true;
         emit(ScraperInitial(scrapers));
-        await _apiClient.runScraper();
+        await _apiClient.restartScraper();
         add(GetScrapers());
       } catch (e) {
         emit(ScraperError(scrapers, error: e.toString()));
@@ -60,6 +61,18 @@ class ScraperBloc extends Bloc<ScraperEvent, ScraperState> {
       hasMore = true;
       emit(ScraperInitial(scrapers));
       add(GetScrapers());
+    });
+
+    on<UpdateTagList>((event, emit) async {
+      try {
+        availableTags = await _apiClient.setTags(event.tags);
+        if (event.tags.length != availableTags.length) {
+          throw Exception('Tags not updated');
+        }
+        emit(ScraperLoaded(scrapers));
+      } catch(e){
+        emit(ScraperError(scrapers, error: e.toString()));
+      }
     });
   }
 }

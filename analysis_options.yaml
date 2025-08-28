@@ -10,13 +10,21 @@ analyzer:
     - lib/*.g.dart
     - lib/**/*.freezed.dart
     - test/**/*.mocks.dart
+  language:
+    strict-raw-types: true
 
 linter:
   rules:
+    close_sinks: true
+    cancel_subscriptions: true
+    use_decorated_box: true
+    avoid_returning_null_for_future: true
+    avoid_returning_null: true
+    prefer_spread_collections: true
+    directives_ordering: true
     unawaited_futures: false
     only_throw_errors: false
     require_trailing_commas: true
-    directives_ordering: false
     prefer_final_fields: true
     sort_pub_dependencies: true
     unnecessary_parenthesis: true

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
 import 'package:maura_scraper_ui/models/scraper_model.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ScraperTile extends StatefulWidget {
   final ScraperModel scraper;
