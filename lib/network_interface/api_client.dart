@@ -64,7 +64,7 @@ class ApiClient {
   ApiClient({
     String? baseUrl,
     Dio? dio,
-    Duration connectTimeout = const Duration(seconds: 60),
+    Duration connectTimeout = const Duration(minutes: 2),
     Duration receiveTimeout = const Duration(seconds: 20),
   })  : baseUrl = baseUrl ??
             const String.fromEnvironment(
@@ -121,13 +121,25 @@ class ApiClient {
     CancelToken? cancelToken,
   }) async {
     try {
+      // Normalize tags to avoid blanks and stray whitespace
+      final List<String> normTags = selectedTags
+          .map((t) => t.trim())
+          .where((t) => t.isNotEmpty)
+          .toList(growable: false);
+
+      // Basic guards
+      final int safePage = page < 1 ? 1 : page;
+      final int safePageSize =
+          pageSize.clamp(1, 500); // adjust upper bound as you like
+
       final resp = await dio.get<Map<String, dynamic>>(
         '/articles',
-        queryParameters: {
-          'page': page,
-          'page_size': pageSize,
-          if (selectedTags.isNotEmpty) 'tags': selectedTags,
+        queryParameters: <String, dynamic>{
+          'page': safePage,
+          'page_size': safePageSize,
+          if (normTags.isNotEmpty) 'tags': normTags, // -> ?tags=a&tags=b&tags=c
         },
+        // Ensures List<String> becomes repeated query params
         options: Options(listFormat: ListFormat.multi),
         cancelToken: cancelToken,
       );
@@ -142,8 +154,6 @@ class ApiClient {
       return ScrapersResponse.fromJson(data);
     } on DioException catch (e) {
       throw _asApiException(e, fallback: 'Failed to load articles');
-    } catch (e) {
-      rethrow;
     }
   }
 
