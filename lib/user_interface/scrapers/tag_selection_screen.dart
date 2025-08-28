@@ -29,8 +29,9 @@ class _TagSelectionScreenState extends State<TagSelectionScreen> {
 
     if (persisted != null && persisted.isNotEmpty) {
       // Keep only tags that still exist in availableTags
-      final filtered =
-          persisted.where((t) => availableTags.map((e) => e.tag).contains(t)).toList();
+      final filtered = persisted
+          .where((t) => availableTags.map((e) => e.tag).contains(t))
+          .toList();
       setState(() {
         selectedTags = filtered;
       });
