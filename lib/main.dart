@@ -10,6 +10,7 @@ late SharedPreferences sharedPreferences;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   availableTags = await ApiClient().getTags();
+  availableTags.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
   sharedPreferences = await SharedPreferences.getInstance();
   runApp(const MyApp());
 }

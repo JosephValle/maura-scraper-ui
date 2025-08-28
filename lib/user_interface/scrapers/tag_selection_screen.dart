@@ -1,16 +1,10 @@
 import 'dart:async';
-import 'dart:convert';
 
-// Only imported when compiling for web; guarded by kIsWeb checks before use.
-import 'dart:html' as html show FileUploadInputElement, FileReader, document;
 import 'dart:typed_data';
 
-import 'package:csv/csv.dart';
-import 'package:excel/excel.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:maura_scraper_ui/utilities/services/excel_service.dart';
 
 import '../../logical_interface/bloc/scraper_bloc.dart';
 import '../../main.dart';
@@ -30,11 +24,12 @@ class _TagSelectionScreenState extends State<TagSelectionScreen> {
   Future<void> _loadPersistedSelection() async {
     // Grab the persisted list (if any)
     final List<String>? persisted =
-    sharedPreferences.getStringList(_kSelectedTagsKey);
+        sharedPreferences.getStringList(_kSelectedTagsKey);
 
     if (persisted != null && persisted.isNotEmpty) {
       // Keep only tags that still exist in availableTags
-      final filtered = persisted.where((t) => availableTags.contains(t)).toList();
+      final filtered =
+          persisted.where((t) => availableTags.contains(t)).toList();
       setState(() {
         selectedTags = filtered;
       });
@@ -87,24 +82,23 @@ class _TagSelectionScreenState extends State<TagSelectionScreen> {
     _saveSelection();
   }
 
-
   Future<void> _handleUploadTags() async {
     try {
-      final Uint8List? bytes = await _pickFileBytes();
+      final Uint8List? bytes = await ExcelService.pickFileBytes();
       if (bytes == null) return;
 
       // Try to detect extension; fall back to content sniffing for CSV
-      final String? pickedName = _lastPickedName;
+      final String? pickedName = lastPickedName;
       final String ext = (pickedName ?? '').toLowerCase();
       List<List<String>> grid;
 
       if (ext.endsWith('.xlsx') || ext.endsWith('.xls')) {
-        grid = await _parseExcel(bytes);
-      } else if (ext.endsWith('.csv') || _looksLikeCsv(bytes)) {
-        grid = await _parseCsv(bytes);
+        grid = await ExcelService.parseExcel(bytes);
+      } else if (ext.endsWith('.csv') || ExcelService.looksLikeCsv(bytes)) {
+        grid = await ExcelService.parseCsv(bytes);
       } else {
         // Attempt excel first, then CSV.
-        grid = await _safeTryExcelElseCsv(bytes);
+        grid = await ExcelService.safeTryExcelElseCsv(bytes);
       }
 
       if (grid.isEmpty) {
@@ -136,7 +130,6 @@ class _TagSelectionScreenState extends State<TagSelectionScreen> {
           nonEmpty.add(tag.replaceAll('"', ''));
         }
       }
-      print("The length of nonEmpty is ${nonEmpty.length}");
 
       if (nonEmpty.isEmpty) return;
 
@@ -178,7 +171,6 @@ class _TagSelectionScreenState extends State<TagSelectionScreen> {
           'Added ${nonEmpty.length} tags to your selection.',
         );
       }
-
     } catch (e) {
       if (!mounted) return;
       await _showInfo(
@@ -190,115 +182,6 @@ class _TagSelectionScreenState extends State<TagSelectionScreen> {
   }
 
   // -------- File picking (web + non-web) --------
-
-  String? _lastPickedName;
-
-  Future<Uint8List?> _pickFileBytes() async {
-    if (kIsWeb) {
-      final html.FileUploadInputElement input = html.FileUploadInputElement()
-        ..accept = '.xlsx,.xls,.csv'
-        ..multiple = false;
-      input.click();
-
-      final completer = Completer<Uint8List?>();
-      input.onChange.listen((event) {
-        if (input.files == null || input.files!.isEmpty) {
-          completer.complete(null);
-          return;
-        }
-        final file = input.files!.first;
-        _lastPickedName = file.name;
-        final reader = html.FileReader();
-        reader.onError
-            .listen((_) => completer.completeError('Failed to read file.'));
-        reader.onLoadEnd.listen((_) {
-          final bytes = reader.result;
-          if (bytes is ByteBuffer) {
-            completer.complete(bytes.asUint8List());
-          } else if (bytes is Uint8List) {
-            completer.complete(bytes);
-          } else {
-            completer.completeError('Unsupported file buffer.');
-          }
-        });
-        reader.readAsArrayBuffer(file);
-      });
-
-      // In some browsers, the dialog can be canceled silently:
-      // add a small fallback in case no change event fires. (Not strictly required)
-      html.document.body?.append(input);
-      return completer.future;
-    } else {
-      final res = await FilePicker.platform.pickFiles(
-        allowMultiple: false,
-        withData: true,
-        type: FileType.custom,
-        allowedExtensions: const ['xlsx', 'xls', 'csv'],
-      );
-      if (res == null || res.files.isEmpty) return null;
-      final file = res.files.single;
-      _lastPickedName = file.name;
-      return file.bytes;
-    }
-  }
-
-  // -------- Parsing helpers --------
-
-  Future<List<List<String>>> _parseExcel(Uint8List bytes) async {
-    final excel = Excel.decodeBytes(bytes);
-    // Pick the first non-empty sheet
-    for (final name in excel.tables.keys) {
-      final sheet = excel.tables[name];
-      if (sheet == null || sheet.maxColumns == 0 || sheet.maxRows == 0) {
-        continue;
-      }
-      final List<List<String>> grid = [];
-      for (final row in sheet.rows) {
-        grid.add(
-          row.map((cell) {
-            final v = cell?.value;
-            if (v == null) return '';
-            return v.toString();
-          }).toList(),
-        );
-      }
-      return grid;
-    }
-    return const [];
-  }
-
-  Future<List<List<String>>> _parseCsv(Uint8List bytes) async {
-    // Try utf8; fallback to latin1
-    String text;
-    try {
-      text = utf8.decode(bytes);
-    } catch (_) {
-      text = const Latin1Decoder().convert(bytes);
-    }
-    final rows = const CsvToListConverter(eol: '\n', shouldParseNumbers: false)
-        .convert(text);
-    return rows
-        .map<List<String>>((r) => r.map((e) => (e ?? '').toString()).toList())
-        .toList();
-  }
-
-  bool _looksLikeCsv(Uint8List bytes) {
-    // Very light heuristic: if it decodes and contains commas/newlines in initial bytes.
-    try {
-      final sample = utf8.decode(bytes.sublist(0, bytes.length.clamp(0, 2048)));
-      return sample.contains(',') || sample.contains(';');
-    } catch (_) {
-      return false;
-    }
-  }
-
-  Future<List<List<String>>> _safeTryExcelElseCsv(Uint8List bytes) async {
-    try {
-      return await _parseExcel(bytes);
-    } catch (_) {
-      return await _parseCsv(bytes);
-    }
-  }
 
   // -------- UI helpers --------
 
@@ -498,8 +381,7 @@ class _TagSelectionScreenState extends State<TagSelectionScreen> {
         ),
         child: InkWell(
           borderRadius: BorderRadius.circular(12.0),
- onTap: () => _toggleTag(tag),
-
+          onTap: () => _toggleTag(tag),
           child: Padding(
             padding: const EdgeInsets.all(12.0),
             child: Text(

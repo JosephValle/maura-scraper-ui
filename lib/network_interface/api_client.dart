@@ -51,7 +51,7 @@ class KeywordsDeleteResponse {
 /// - GET    /keywords
 /// - POST   /keywords
 /// - DELETE /keywords
-/// - DELETE /keywords/<value>
+/// - DELETE /keywords/{value}
 class ApiClient {
   /// Default comes from `--dart-define=API_BASE_URL=...` if provided.
   final String baseUrl;
@@ -65,36 +65,40 @@ class ApiClient {
     Duration connectTimeout = const Duration(seconds: 60),
     Duration receiveTimeout = const Duration(seconds: 20),
   })  : baseUrl = baseUrl ??
-      const String.fromEnvironment(
-        'API_BASE_URL',
-        defaultValue: 'https://maura-scraper.onrender.com',
-      ),
+            const String.fromEnvironment(
+              'API_BASE_URL',
+              defaultValue: 'https://maura-scraper.onrender.com',
+            ),
         dio = dio ??
-            Dio(BaseOptions(
-              connectTimeout: connectTimeout,
-              receiveTimeout: receiveTimeout,
-              responseType: ResponseType.json,
-              // Note: We set the baseUrl here to keep calls concise.
-              baseUrl: baseUrl ??
-                  const String.fromEnvironment(
-                    'API_BASE_URL',
-                    defaultValue: 'https://maura-scraper.onrender.com',
-                  ),
-              headers: const {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-              },
-            )) {
+            Dio(
+              BaseOptions(
+                connectTimeout: connectTimeout,
+                receiveTimeout: receiveTimeout,
+                responseType: ResponseType.json,
+                // Note: We set the baseUrl here to keep calls concise.
+                baseUrl: baseUrl ??
+                    const String.fromEnvironment(
+                      'API_BASE_URL',
+                      defaultValue: 'https://maura-scraper.onrender.com',
+                    ),
+                headers: const {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+                },
+              ),
+            ) {
     // Minimal logging in debug builds.
     if (kDebugMode) {
-      this.dio.interceptors.add(LogInterceptor(
-        request: true,
-        requestBody: true,
-        requestHeader: false,
-        responseHeader: false,
-        responseBody: false,
-        error: true,
-      ));
+      this.dio.interceptors.add(
+            LogInterceptor(
+              request: true,
+              requestBody: true,
+              requestHeader: false,
+              responseHeader: false,
+              responseBody: false,
+              error: true,
+            ),
+          );
     }
   }
 
@@ -128,8 +132,10 @@ class ApiClient {
 
       final data = resp.data;
       if (data == null) {
-        throw ApiException('Empty response body from /articles',
-            statusCode: resp.statusCode);
+        throw ApiException(
+          'Empty response body from /articles',
+          statusCode: resp.statusCode,
+        );
       }
       return ScrapersResponse.fromJson(data);
     } on DioException catch (e) {
@@ -188,12 +194,14 @@ class ApiClient {
   /// PUT /tags with EXACT replacement semantics.
   /// Server echoes exactly what it receives: {"tags": [...]}
   Future<List<String>> setTags(
-      List<String> tags, {
-        CancelToken? cancelToken,
-        bool usePost = false, // flip to true if you prefer POST over PUT
-      }) async {
+    List<String> tags, {
+    CancelToken? cancelToken,
+    bool usePost = false, // flip to true if you prefer POST over PUT
+  }) async {
     try {
-      final method = usePost ? dio.post<Map<String, dynamic>> : dio.put<Map<String, dynamic>>;
+      final method = usePost
+          ? dio.post<Map<String, dynamic>>
+          : dio.put<Map<String, dynamic>>;
       final resp = await method(
         '/tags',
         data: jsonEncode({'tags': tags}),
@@ -230,9 +238,9 @@ class ApiClient {
 
   /// POST /keywords with a single keyword.
   Future<KeywordsAddResponse> addKeyword(
-      String keyword, {
-        CancelToken? cancelToken,
-      }) async {
+    String keyword, {
+    CancelToken? cancelToken,
+  }) async {
     try {
       final resp = await dio.post<Map<String, dynamic>>(
         '/keywords',
@@ -251,9 +259,9 @@ class ApiClient {
 
   /// POST /keywords with multiple keywords.
   Future<KeywordsAddResponse> addKeywords(
-      List<String> keywords, {
-        CancelToken? cancelToken,
-      }) async {
+    List<String> keywords, {
+    CancelToken? cancelToken,
+  }) async {
     try {
       final resp = await dio.post<Map<String, dynamic>>(
         '/keywords',
@@ -272,9 +280,9 @@ class ApiClient {
 
   /// DELETE /keywords with a JSON body: {"keywords": [...]}
   Future<KeywordsDeleteResponse> deleteKeywordsBulk(
-      List<String> keywords, {
-        CancelToken? cancelToken,
-      }) async {
+    List<String> keywords, {
+    CancelToken? cancelToken,
+  }) async {
     try {
       final resp = await dio.delete<Map<String, dynamic>>(
         '/keywords',
@@ -291,11 +299,11 @@ class ApiClient {
     }
   }
 
-  /// DELETE /keywords/<value>
+  /// DELETE /keywords/{value}
   Future<KeywordsDeleteResponse> deleteKeywordSingle(
-      String value, {
-        CancelToken? cancelToken,
-      }) async {
+    String value, {
+    CancelToken? cancelToken,
+  }) async {
     try {
       final encoded = Uri.encodeComponent(value);
       final resp = await dio.delete<Map<String, dynamic>>(

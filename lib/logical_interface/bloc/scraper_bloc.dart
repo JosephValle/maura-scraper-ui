@@ -70,7 +70,7 @@ class ScraperBloc extends Bloc<ScraperEvent, ScraperState> {
           throw Exception('Tags not updated');
         }
         emit(ScraperLoaded(scrapers));
-      } catch(e){
+      } catch (e) {
         emit(ScraperError(scrapers, error: e.toString()));
       }
     });
