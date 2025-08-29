@@ -58,9 +58,11 @@ class _MyAppState extends State<MyApp> {
           const Center(child: CircularProgressIndicator()),
           const SizedBox(height: 20),
           Center(
-            child: Text(takingAWhile
-                ? 'Loading from Cold Start... This can take up to 2 minutes'
-                : 'Loading...',),
+            child: Text(
+              takingAWhile
+                  ? 'Loading from Cold Start... This can take up to 2 minutes'
+                  : 'Loading...',
+            ),
           ),
         ],
       ),
