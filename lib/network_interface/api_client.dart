@@ -132,17 +132,16 @@ class ApiClient {
       final int safePageSize =
           pageSize.clamp(1, 500); // adjust upper bound as you like
 
-      final resp = await dio.get<Map<String, dynamic>>(
-        '/articles',
-        queryParameters: <String, dynamic>{
+      final resp = await dio.post<Map<String, dynamic>>(
+        '/articles/search',
+        data: {
           'page': safePage,
           'page_size': safePageSize,
-          if (normTags.isNotEmpty) 'tags': normTags, // -> ?tags=a&tags=b&tags=c
+          if (normTags.isNotEmpty) 'tags': normTags,
         },
-        // Ensures List<String> becomes repeated query params
-        options: Options(listFormat: ListFormat.multi),
         cancelToken: cancelToken,
       );
+
 
       final data = resp.data;
       if (data == null) {
