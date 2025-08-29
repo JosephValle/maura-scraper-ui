@@ -142,7 +142,6 @@ class ApiClient {
         cancelToken: cancelToken,
       );
 
-
       final data = resp.data;
       if (data == null) {
         throw ApiException(
